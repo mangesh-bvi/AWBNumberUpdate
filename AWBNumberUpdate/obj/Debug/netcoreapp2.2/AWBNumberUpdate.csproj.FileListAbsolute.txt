@@ -1,0 +1,12 @@
+D:\Kaustubh\ALLBackjobs\AWBNumber\AWBNumberUpdate\AWBNumberUpdate\bin\Debug\netcoreapp2.2\appsettings.json
+D:\Kaustubh\ALLBackjobs\AWBNumber\AWBNumberUpdate\AWBNumberUpdate\bin\Debug\netcoreapp2.2\AWBNumberUpdate.deps.json
+D:\Kaustubh\ALLBackjobs\AWBNumber\AWBNumberUpdate\AWBNumberUpdate\bin\Debug\netcoreapp2.2\AWBNumberUpdate.runtimeconfig.json
+D:\Kaustubh\ALLBackjobs\AWBNumber\AWBNumberUpdate\AWBNumberUpdate\bin\Debug\netcoreapp2.2\AWBNumberUpdate.runtimeconfig.dev.json
+D:\Kaustubh\ALLBackjobs\AWBNumber\AWBNumberUpdate\AWBNumberUpdate\bin\Debug\netcoreapp2.2\AWBNumberUpdate.dll
+D:\Kaustubh\ALLBackjobs\AWBNumber\AWBNumberUpdate\AWBNumberUpdate\bin\Debug\netcoreapp2.2\AWBNumberUpdate.pdb
+D:\Kaustubh\ALLBackjobs\AWBNumber\AWBNumberUpdate\AWBNumberUpdate\obj\Debug\netcoreapp2.2\AWBNumberUpdate.csprojAssemblyReference.cache
+D:\Kaustubh\ALLBackjobs\AWBNumber\AWBNumberUpdate\AWBNumberUpdate\obj\Debug\netcoreapp2.2\AWBNumberUpdate.csproj.CoreCompileInputs.cache
+D:\Kaustubh\ALLBackjobs\AWBNumber\AWBNumberUpdate\AWBNumberUpdate\obj\Debug\netcoreapp2.2\AWBNumberUpdate.AssemblyInfoInputs.cache
+D:\Kaustubh\ALLBackjobs\AWBNumber\AWBNumberUpdate\AWBNumberUpdate\obj\Debug\netcoreapp2.2\AWBNumberUpdate.AssemblyInfo.cs
+D:\Kaustubh\ALLBackjobs\AWBNumber\AWBNumberUpdate\AWBNumberUpdate\obj\Debug\netcoreapp2.2\AWBNumberUpdate.dll
+D:\Kaustubh\ALLBackjobs\AWBNumber\AWBNumberUpdate\AWBNumberUpdate\obj\Debug\netcoreapp2.2\AWBNumberUpdate.pdb
