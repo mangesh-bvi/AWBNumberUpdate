@@ -77,8 +77,8 @@ namespace AWBNumberUpdate
 
                         orderDetails orderDetails = new orderDetails
                         {
-
-                            order_id = ds.Tables[0].Rows[i]["ID"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["ID"]),
+                            Id = ds.Tables[0].Rows[i]["ID"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[0].Rows[i]["ID"]),
+                            order_id = ds.Tables[0].Rows[i]["InvoiceNo"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["InvoiceNo"]),
                             order_date = ds.Tables[0].Rows[i]["Date"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["Date"]),
                             billing_customer_name = ds.Tables[0].Rows[i]["CustomerName"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["CustomerName"]),
                             billing_address = ds.Tables[0].Rows[i]["ShippingAddress"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["ShippingAddress"]),
@@ -141,12 +141,7 @@ namespace AWBNumberUpdate
                         if (awbResponce.data.awb_code != "" && awbResponce.data.courier_name != "")
                         {
                             
-                            InsertCourierResponse(Convert.ToInt32(orderDetails.order_id), ItemIDs,awbResponce.data.awb_code, awbResponce.data.courier_company_id, awbResponce.data.courier_name, awbResponce.data.order_id, awbResponce.data.shipment_id);
-
-                            //UpdateCourierResponse(order_id, awbResponce.data.awb_code, awbResponce.data.courier_company_id, awbResponce.data.courier_name, awbResponce.data.order_id, awbResponce.data.shipment_id);
-                            //Insert To Database 
-                            //call Other 2 APIS
-                            //Call GeneratePickup
+                            InsertCourierResponse(orderDetails.Id, ItemIDs,awbResponce.data.awb_code, awbResponce.data.courier_company_id, awbResponce.data.courier_name, awbResponce.data.order_id, awbResponce.data.shipment_id);
 
                             PickupManifestRequest pickupManifestRequest = new PickupManifestRequest()
                             {
@@ -159,7 +154,7 @@ namespace AWBNumberUpdate
                             pickupManifest = JsonConvert.DeserializeObject<PickupManifestResponce>(apiGenPickupRes);
 
 
-                            ////Call GenerateMenifest
+                            
                             string apiGenMenifestReq = JsonConvert.SerializeObject(pickupManifestRequest);
                             apiGenMenifestRes = CommonService.SendApiRequest(ClientAPIURL + "/api/ShoppingBag/GenerateManifest", apiGenMenifestReq);
                             pickupManifest = JsonConvert.DeserializeObject<PickupManifestResponce>(apiGenMenifestRes);
@@ -172,7 +167,7 @@ namespace AWBNumberUpdate
                                 //AWBCode = "";
                                 //CourierPartnerName ="Store";
                                
-                                AddStoreResponse(Convert.ToInt32(orderDetails.order_id), ItemIDs,TenantId, true);
+                                AddStoreResponse(orderDetails.Id, ItemIDs,TenantId, true);
 
                             }
                             else
@@ -182,7 +177,7 @@ namespace AWBNumberUpdate
                                 //CourierPartnerName ="";
                                 //This record will Move to Return Tab
                                
-                                AddStoreResponse(Convert.ToInt32(orderDetails.order_id), ItemIDs, TenantId, false);
+                                AddStoreResponse(orderDetails.Id, ItemIDs, TenantId, false);
                             }
 
                         }
