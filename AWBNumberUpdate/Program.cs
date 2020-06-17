@@ -27,20 +27,73 @@ namespace AWBNumberUpdate
         {
             while (true)
             {
+                //GetConnectionStrings();
                 GetdataFromMySQL();
                 Thread.Sleep(delaytime);
             }
         }
+
+        //public static void GetConnectionStrings()
+        //{
+        //    string ServerName = string.Empty;
+        //    string ServerCredentailsUsername = string.Empty;
+        //    string ServerCredentailsPassword = string.Empty;
+        //    string DBConnection = string.Empty;
+
+
+        //    try
+        //    {
+        //        DataTable dt = new DataTable();
+        //        IConfiguration config = new ConfigurationBuilder().AddJsonFile("appsettings.json", true, true).Build();
+        //        var constr = config.GetSection("ConnectionStrings").GetSection("HomeShop").Value;
+        //        MySqlConnection con = new MySqlConnection(constr);
+        //        MySqlCommand cmd = new MySqlCommand("SP_HSGetAllConnectionstrings", con);
+        //        cmd.CommandType = System.Data.CommandType.StoredProcedure;
+        //        cmd.Connection.Open();
+        //        MySqlDataAdapter da = new MySqlDataAdapter(cmd);
+        //        da.Fill(dt);
+        //        cmd.Connection.Close();
+
+        //        if (dt.Rows.Count > 0)
+        //        {
+        //            for (int i = 0; i < dt.Rows.Count; i++)
+        //            {
+        //                DataRow dr = dt.Rows[i];
+        //                ServerName = Convert.ToString(dr["ServerName"]);
+        //                ServerCredentailsUsername = Convert.ToString(dr["ServerCredentailsUsername"]);
+        //                ServerCredentailsPassword = Convert.ToString(dr["ServerCredentailsPassword"]);
+        //                DBConnection = Convert.ToString(dr["DBConnection"]);
+
+        //                string ConString = "Data Source = " + ServerName + " ; port = " + 3306 + "; Initial Catalog = " + DBConnection + " ; User Id = " + ServerCredentailsUsername + "; password = " + ServerCredentailsPassword + "";
+        //                GetdataFromMySQL(ConString);
+        //            }
+        //        }
+        //    }
+        //    catch 
+        //    {
+
+
+        //    }
+        //    finally
+        //    {
+
+        //        GC.Collect();
+        //    }
+
+
+        //}
+
+
         public static void GetdataFromMySQL()
         {
             string apiResponse = string.Empty;
             string apiGenPickupRes = string.Empty;
             string apiGenMenifestRes = string.Empty;
-            bool StoreDelivery = true;
-            int TenantId = 0;
 
             AWBResponce awbResponce = new AWBResponce();
-            PickupManifestResponce pickupManifest = new PickupManifestResponce();
+            PickupResponce pickupResponce = new PickupResponce();
+            ManifestResponce manifestResponce = new ManifestResponce();
+
             MySqlConnection con = null;
             try
             {
@@ -101,22 +154,27 @@ namespace AWBNumberUpdate
                             shipping_email = "naruto@uzumaki.com",
                             payment_method = "Prepaid",
                             pickup_location = "Test",
-                            channel_id= "633828",
-                            billing_last_name= "",
-                            billing_address_2= "",
-                            billing_alternate_phone="",
+                            channel_id = "633828",
+                            billing_last_name = "",
+                            billing_address_2 = "",
+                            billing_alternate_phone = "",
                             shipping_last_name = "",
-                            shipping_address_2= "",
+                            shipping_address_2 = "",
+                            sub_total = 20,
+                            length = 10,
+                            breadth = 10,
+                            height = 2,
+                            weight = 2,
                             StoreDelivery = Convert.ToBoolean(ds.Tables[0].Rows[i]["StoreDelivery"]),
                             TenantId = ds.Tables[0].Rows[i]["TenantId"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[0].Rows[i]["TenantId"]),
-                            order_items = new List<order_items>(),
+                            order_items = new List<order_items>()
                         };
                         List<order_items> listobj = new List<order_items>();
 
-                        string ItemIDs ="";
+                        string ItemIDs = "";
                         for (int j = 0; j < ds.Tables[2].Rows.Count; j++)
                         {
-                            if (Convert.ToInt32(ds.Tables[2].Rows[j]["OrderID"]) == Convert.ToInt32(orderDetails.order_id))
+                            if (Convert.ToInt32(ds.Tables[2].Rows[j]["OrderID"]) == Convert.ToInt32(orderDetails.Id))
                             {
                                 order_items objorder_Items = new order_items()
                                 {
@@ -138,36 +196,42 @@ namespace AWBNumberUpdate
                         string apiReq = JsonConvert.SerializeObject(objdetails);
                         apiResponse = CommonService.SendApiRequest(ClientAPIURL + "/api/ShoppingBag/GetCouriersPartnerAndAWBCode", apiReq);
                         awbResponce = JsonConvert.DeserializeObject<AWBResponce>(apiResponse);
+
                         if (awbResponce.data.awb_code != "" && awbResponce.data.courier_name != "")
                         {
-                            
-                            InsertCourierResponse(orderDetails.Id, ItemIDs,awbResponce.data.awb_code, awbResponce.data.courier_company_id, awbResponce.data.courier_name, awbResponce.data.order_id, awbResponce.data.shipment_id);
+
+
+                            //InsertCourierResponse(orderDetails.Id, ItemIDs, "SF19361089KR", "58", "Shadow FaxForward", "41661764", "41661764");
+
+
+
+                            InsertCourierResponse(orderDetails.Id, ItemIDs, awbResponce.data.awb_code, awbResponce.data.courier_company_id, awbResponce.data.courier_name, awbResponce.data.order_id, awbResponce.data.shipment_id);
 
                             PickupManifestRequest pickupManifestRequest = new PickupManifestRequest()
                             {
-                                shipmentId = Convert.ToInt32(awbResponce.data.shipment_id)
+                                shipmentId = 41661764
                             };
 
 
                             string apiGenPickupReq = JsonConvert.SerializeObject(pickupManifestRequest);
                             apiGenPickupRes = CommonService.SendApiRequest(ClientAPIURL + "/api​/ShoppingBag​/GeneratePickup", apiGenPickupReq);
-                            pickupManifest = JsonConvert.DeserializeObject<PickupManifestResponce>(apiGenPickupRes);
+                            pickupResponce = JsonConvert.DeserializeObject<PickupResponce>(apiGenPickupRes);
 
 
-                            
+
                             string apiGenMenifestReq = JsonConvert.SerializeObject(pickupManifestRequest);
                             apiGenMenifestRes = CommonService.SendApiRequest(ClientAPIURL + "/api/ShoppingBag/GenerateManifest", apiGenMenifestReq);
-                            pickupManifest = JsonConvert.DeserializeObject<PickupManifestResponce>(apiGenMenifestRes);
+                            manifestResponce = JsonConvert.DeserializeObject<ManifestResponce>(apiGenMenifestRes);
                         }
                         else
                         {
-                            if (StoreDelivery == true)
+                            if (orderDetails.StoreDelivery == true)
                             {
                                 //If StoreMaster flag is true
                                 //AWBCode = "";
                                 //CourierPartnerName ="Store";
-                               
-                                AddStoreResponse(orderDetails.Id, ItemIDs,TenantId, true);
+
+                                AddStoreResponse(orderDetails.Id, ItemIDs, orderDetails.TenantId, true);
 
                             }
                             else
@@ -176,20 +240,20 @@ namespace AWBNumberUpdate
                                 //AWBCode = "";
                                 //CourierPartnerName ="";
                                 //This record will Move to Return Tab
-                               
-                                AddStoreResponse(orderDetails.Id, ItemIDs, TenantId, false);
+
+                                AddStoreResponse(orderDetails.Id, ItemIDs, orderDetails.TenantId, false);
                             }
 
                         }
-                        
+
                     }
 
                 }
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+
             }
             finally
             {
@@ -202,7 +266,7 @@ namespace AWBNumberUpdate
         }
 
 
-        public static void AddStoreResponse(int ID,string ItemIDs,int TenantId,bool storeFlag)
+        public static void AddStoreResponse(int ID, string ItemIDs, int TenantId, bool storeFlag)
         {
 
             try
@@ -221,7 +285,7 @@ namespace AWBNumberUpdate
                 cmd.Parameters.AddWithValue("@_storeFlag", storeFlag);
                 cmd.Parameters.AddWithValue("@_awbCode", "");
                 //cmd.Parameters.AddWithValue("@_courierCompnyName", courierCompnyName);
-                
+
 
 
                 cmd.Connection.Open();
@@ -239,7 +303,7 @@ namespace AWBNumberUpdate
 
         }
 
-        public static void InsertCourierResponse(int OrderId, string ItemIDs,string awbCode, string courierCompnyId, string courierCompnyName, string courierOrderId, string courierShipmentId)
+        public static void InsertCourierResponse(int OrderId, string ItemIDs, string awbCode, string courierCompnyId, string courierCompnyName, string courierOrderId, string courierShipmentId)
         {
 
             try
@@ -248,12 +312,11 @@ namespace AWBNumberUpdate
                 IConfiguration config = new ConfigurationBuilder().AddJsonFile("appsettings.json", true, true).Build();
                 var constr = config.GetSection("ConnectionStrings").GetSection("HomeShop").Value;
                 MySqlConnection con = new MySqlConnection(constr);
-                //MySqlCommand cmd = new MySqlCommand("SP_PHYUpdateCourierResponce", con)
+               
                 MySqlCommand cmd = new MySqlCommand("SP_PHYInsertAWBDetails", con)
                 {
                     CommandType = CommandType.StoredProcedure
                 };
-
                 cmd.Parameters.AddWithValue("@order_ID", OrderId);
                 cmd.Parameters.AddWithValue("@item_IDs", ItemIDs);
                 cmd.Parameters.AddWithValue("@_Awb_code", awbCode);

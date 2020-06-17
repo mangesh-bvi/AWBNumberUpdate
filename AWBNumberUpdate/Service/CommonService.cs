@@ -34,9 +34,9 @@ namespace AWBNumberUpdate.Service
                     strresponse = streamReader.ReadToEnd();
                 }
             }
-            catch (Exception ex)
+            catch (Exception )
             {
-                throw ex;
+                //throw ex;
             }
 
             return strresponse;
