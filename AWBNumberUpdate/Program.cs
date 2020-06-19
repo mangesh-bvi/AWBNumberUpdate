@@ -27,64 +27,64 @@ namespace AWBNumberUpdate
         {
             while (true)
             {
-                //GetConnectionStrings();
-                GetdataFromMySQL();
+               GetConnectionStrings();
+                //GetdataFromMySQL();
                 Thread.Sleep(delaytime);
             }
         }
 
-        //public static void GetConnectionStrings()
-        //{
-        //    string ServerName = string.Empty;
-        //    string ServerCredentailsUsername = string.Empty;
-        //    string ServerCredentailsPassword = string.Empty;
-        //    string DBConnection = string.Empty;
+        public static void GetConnectionStrings()
+        {
+            string ServerName = string.Empty;
+            string ServerCredentailsUsername = string.Empty;
+            string ServerCredentailsPassword = string.Empty;
+            string DBConnection = string.Empty;
 
 
-        //    try
-        //    {
-        //        DataTable dt = new DataTable();
-        //        IConfiguration config = new ConfigurationBuilder().AddJsonFile("appsettings.json", true, true).Build();
-        //        var constr = config.GetSection("ConnectionStrings").GetSection("HomeShop").Value;
-        //        MySqlConnection con = new MySqlConnection(constr);
-        //        MySqlCommand cmd = new MySqlCommand("SP_HSGetAllConnectionstrings", con);
-        //        cmd.CommandType = System.Data.CommandType.StoredProcedure;
-        //        cmd.Connection.Open();
-        //        MySqlDataAdapter da = new MySqlDataAdapter(cmd);
-        //        da.Fill(dt);
-        //        cmd.Connection.Close();
+            try
+            {
+                DataTable dt = new DataTable();
+                IConfiguration config = new ConfigurationBuilder().AddJsonFile("appsettings.json", true, true).Build();
+                var constr = config.GetSection("ConnectionStrings").GetSection("HomeShop").Value;
+                MySqlConnection con = new MySqlConnection(constr);
+                MySqlCommand cmd = new MySqlCommand("SP_HSGetAllConnectionstrings", con);
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                cmd.Connection.Open();
+                MySqlDataAdapter da = new MySqlDataAdapter(cmd);
+                da.Fill(dt);
+                cmd.Connection.Close();
 
-        //        if (dt.Rows.Count > 0)
-        //        {
-        //            for (int i = 0; i < dt.Rows.Count; i++)
-        //            {
-        //                DataRow dr = dt.Rows[i];
-        //                ServerName = Convert.ToString(dr["ServerName"]);
-        //                ServerCredentailsUsername = Convert.ToString(dr["ServerCredentailsUsername"]);
-        //                ServerCredentailsPassword = Convert.ToString(dr["ServerCredentailsPassword"]);
-        //                DBConnection = Convert.ToString(dr["DBConnection"]);
+                if (dt.Rows.Count > 0)
+                {
+                    for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        DataRow dr = dt.Rows[i];
+                        ServerName = Convert.ToString(dr["ServerName"]);
+                        ServerCredentailsUsername = Convert.ToString(dr["ServerCredentailsUsername"]);
+                        ServerCredentailsPassword = Convert.ToString(dr["ServerCredentailsPassword"]);
+                        DBConnection = Convert.ToString(dr["DBConnection"]);
 
-        //                string ConString = "Data Source = " + ServerName + " ; port = " + 3306 + "; Initial Catalog = " + DBConnection + " ; User Id = " + ServerCredentailsUsername + "; password = " + ServerCredentailsPassword + "";
-        //                GetdataFromMySQL(ConString);
-        //            }
-        //        }
-        //    }
-        //    catch 
-        //    {
-
-
-        //    }
-        //    finally
-        //    {
-
-        //        GC.Collect();
-        //    }
+                        string ConString = "Data Source = " + ServerName + " ; port = " + 3306 + "; Initial Catalog = " + DBConnection + " ; User Id = " + ServerCredentailsUsername + "; password = " + ServerCredentailsPassword + "";
+                        GetdataFromMySQL(ConString);
+                    }
+                }
+            }
+            catch
+            {
 
 
-        //}
+            }
+            finally
+            {
+
+                GC.Collect();
+            }
 
 
-        public static void GetdataFromMySQL()
+        }
+
+
+        public static void GetdataFromMySQL(string ConString)
         {
             string apiResponse = string.Empty;
             string apiGenPickupRes = string.Empty;
@@ -99,11 +99,10 @@ namespace AWBNumberUpdate
             {
                 DataSet ds = new DataSet();
                 AWBRequest objdetails = new AWBRequest();
-
                 IConfiguration config = new ConfigurationBuilder().AddJsonFile("appsettings.json", true, true).Build();
                 var constr = config.GetSection("ConnectionStrings").GetSection("HomeShop").Value;
                 string ClientAPIURL = config.GetSection("MySettings").GetSection("ClientAPIURL").Value;
-                con = new MySqlConnection(constr);
+                con = new MySqlConnection(ConString);
                 MySqlCommand cmd = new MySqlCommand("SP_PHYGetOrderdetailForAWB", con)
                 {
                     CommandType = System.Data.CommandType.StoredProcedure
@@ -199,49 +198,36 @@ namespace AWBNumberUpdate
 
                         if (awbResponce.data.awb_code != "" && awbResponce.data.courier_name != "")
                         {
-
-
-                            //InsertCourierResponse(orderDetails.Id, ItemIDs, "SF19361089KR", "58", "Shadow FaxForward", "41661764", "41661764");
-
-
-
-                            InsertCourierResponse(orderDetails.Id, ItemIDs, awbResponce.data.awb_code, awbResponce.data.courier_company_id, awbResponce.data.courier_name, awbResponce.data.order_id, awbResponce.data.shipment_id);
+                          InsertCourierResponse(orderDetails.Id, ItemIDs, awbResponce.data.awb_code, awbResponce.data.courier_company_id, awbResponce.data.courier_name, awbResponce.data.order_id, awbResponce.data.shipment_id, ConString);
 
                             PickupManifestRequest pickupManifestRequest = new PickupManifestRequest()
                             {
-                                shipmentId = 41661764
+                                shipmentId = Convert.ToInt32(awbResponce.data.shipment_id)
                             };
-
-
                             string apiGenPickupReq = JsonConvert.SerializeObject(pickupManifestRequest);
                             apiGenPickupRes = CommonService.SendApiRequest(ClientAPIURL + "/api​/ShoppingBag​/GeneratePickup", apiGenPickupReq);
                             pickupResponce = JsonConvert.DeserializeObject<PickupResponce>(apiGenPickupRes);
-
-
-
+                            if (pickupResponce.response.pickupTokenNumber!="")
+                            {
+                                UpdateGeneratePickupManifest(orderDetails.Id, orderDetails.TenantId, orderDetails.Id, "Pickup",ConString);
+                            }
                             string apiGenMenifestReq = JsonConvert.SerializeObject(pickupManifestRequest);
                             apiGenMenifestRes = CommonService.SendApiRequest(ClientAPIURL + "/api/ShoppingBag/GenerateManifest", apiGenMenifestReq);
                             manifestResponce = JsonConvert.DeserializeObject<ManifestResponce>(apiGenMenifestRes);
+                            if (manifestResponce.status =="1")
+                            {
+                                UpdateGeneratePickupManifest(orderDetails.Id, orderDetails.TenantId, orderDetails.Id, "Manifest",ConString);
+                            }
                         }
                         else
                         {
                             if (orderDetails.StoreDelivery == true)
                             {
-                                //If StoreMaster flag is true
-                                //AWBCode = "";
-                                //CourierPartnerName ="Store";
-
-                                AddStoreResponse(orderDetails.Id, ItemIDs, orderDetails.TenantId, true);
-
+                                 AddStoreResponse(orderDetails.Id, ItemIDs, orderDetails.TenantId, true, ConString);
                             }
                             else
                             {
-                                //If StoreMaster flag is false
-                                //AWBCode = "";
-                                //CourierPartnerName ="";
-                                //This record will Move to Return Tab
-
-                                AddStoreResponse(orderDetails.Id, ItemIDs, orderDetails.TenantId, false);
+                              AddStoreResponse(orderDetails.Id, ItemIDs, orderDetails.TenantId, false, ConString);
                             }
 
                         }
@@ -266,7 +252,7 @@ namespace AWBNumberUpdate
         }
 
 
-        public static void AddStoreResponse(int ID, string ItemIDs, int TenantId, bool storeFlag)
+        public static void AddStoreResponse(int ID, string ItemIDs, int TenantId, bool storeFlag,string ConString)
         {
 
             try
@@ -274,7 +260,7 @@ namespace AWBNumberUpdate
                 DataTable dt = new DataTable();
                 IConfiguration config = new ConfigurationBuilder().AddJsonFile("appsettings.json", true, true).Build();
                 var constr = config.GetSection("ConnectionStrings").GetSection("HomeShop").Value;
-                MySqlConnection con = new MySqlConnection(constr);
+                MySqlConnection con = new MySqlConnection(ConString);
                 MySqlCommand cmd = new MySqlCommand("SP_PHYUpdateStoreResponce", con)
                 {
                     CommandType = CommandType.StoredProcedure
@@ -303,7 +289,7 @@ namespace AWBNumberUpdate
 
         }
 
-        public static void InsertCourierResponse(int OrderId, string ItemIDs, string awbCode, string courierCompnyId, string courierCompnyName, string courierOrderId, string courierShipmentId)
+        public static void InsertCourierResponse(int OrderId, string ItemIDs, string awbCode, string courierCompnyId, string courierCompnyName, string courierOrderId, string courierShipmentId,string ConString)
         {
 
             try
@@ -311,7 +297,7 @@ namespace AWBNumberUpdate
                 DataTable dt = new DataTable();
                 IConfiguration config = new ConfigurationBuilder().AddJsonFile("appsettings.json", true, true).Build();
                 var constr = config.GetSection("ConnectionStrings").GetSection("HomeShop").Value;
-                MySqlConnection con = new MySqlConnection(constr);
+                MySqlConnection con = new MySqlConnection(ConString);
                
                 MySqlCommand cmd = new MySqlCommand("SP_PHYInsertAWBDetails", con)
                 {
@@ -339,5 +325,37 @@ namespace AWBNumberUpdate
 
         }
 
+
+        public static void UpdateGeneratePickupManifest(int orderID, int tenantID, int userID, string status,string ConString)
+        {
+           
+            try
+            {
+                DataTable dt = new DataTable();
+                IConfiguration config = new ConfigurationBuilder().AddJsonFile("appsettings.json", true, true).Build();
+                var constr = config.GetSection("ConnectionStrings").GetSection("HomeShop").Value;
+                MySqlConnection con = new MySqlConnection(ConString);
+                MySqlCommand cmd = new MySqlCommand("SP_PHYUpdateflagPickupManifest", con)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+                cmd.Parameters.AddWithValue("@order_ID", orderID);
+                cmd.Parameters.AddWithValue("@tenant_ID", tenantID);
+                cmd.Parameters.AddWithValue("@user_ID", userID);
+                cmd.Parameters.AddWithValue("@_status", status);
+                cmd.Connection.Open();
+                cmd.ExecuteNonQuery();
+                cmd.Connection.Close();
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                GC.Collect();
+            }
+
+        }
     }
 }

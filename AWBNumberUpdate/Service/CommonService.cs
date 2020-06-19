@@ -36,6 +36,7 @@ namespace AWBNumberUpdate.Service
             }
             catch (Exception )
             {
+               
                 //throw ex;
             }
 
