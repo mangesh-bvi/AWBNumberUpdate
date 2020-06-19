@@ -200,23 +200,49 @@ namespace AWBNumberUpdate
                         {
                           InsertCourierResponse(orderDetails.Id, ItemIDs, awbResponce.data.awb_code, awbResponce.data.courier_company_id, awbResponce.data.courier_name, awbResponce.data.order_id, awbResponce.data.shipment_id, ConString);
 
-                            PickupManifestRequest pickupManifestRequest = new PickupManifestRequest()
+                            if (awbResponce != null)
                             {
-                                shipmentId = Convert.ToInt32(awbResponce.data.shipment_id)
-                            };
-                            string apiGenPickupReq = JsonConvert.SerializeObject(pickupManifestRequest);
-                            apiGenPickupRes = CommonService.SendApiRequest(ClientAPIURL + "/api​/ShoppingBag​/GeneratePickup", apiGenPickupReq);
-                            pickupResponce = JsonConvert.DeserializeObject<PickupResponce>(apiGenPickupRes);
-                            if (pickupResponce.response.pickupTokenNumber!="")
-                            {
-                                UpdateGeneratePickupManifest(orderDetails.Id, orderDetails.TenantId, orderDetails.Id, "Pickup",ConString);
-                            }
-                            string apiGenMenifestReq = JsonConvert.SerializeObject(pickupManifestRequest);
-                            apiGenMenifestRes = CommonService.SendApiRequest(ClientAPIURL + "/api/ShoppingBag/GenerateManifest", apiGenMenifestReq);
-                            manifestResponce = JsonConvert.DeserializeObject<ManifestResponce>(apiGenMenifestRes);
-                            if (manifestResponce.status =="1")
-                            {
-                                UpdateGeneratePickupManifest(orderDetails.Id, orderDetails.TenantId, orderDetails.Id, "Manifest",ConString);
+                                if (awbResponce.data != null)
+                                {
+                                    if (awbResponce.data.shipment_id != null)
+                                    {
+                                        PickupManifestRequest pickupManifestRequest = new PickupManifestRequest()
+                                        {
+                                            shipmentId = new List<int> {
+                                                Convert.ToInt32(awbResponce.data.shipment_id)  
+                                            }
+                                        };
+
+                                        try
+                                        {
+                                            string apiGenPickupReq = JsonConvert.SerializeObject(pickupManifestRequest);
+                                            apiGenPickupRes = CommonService.SendApiRequest(ClientAPIURL + "/api​/ShoppingBag​/GeneratePickup", apiGenPickupReq);
+                                            pickupResponce = JsonConvert.DeserializeObject<PickupResponce>(apiGenPickupRes);
+                                            if (pickupResponce.response.pickupTokenNumber != "")
+                                            {
+                                                UpdateGeneratePickupManifest(orderDetails.Id, orderDetails.TenantId, orderDetails.Id, "Pickup", ConString);
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+                                        }
+                                        try
+                                        {
+                                            string apiGenMenifestReq = JsonConvert.SerializeObject(pickupManifestRequest);
+                                            apiGenMenifestRes = CommonService.SendApiRequest(ClientAPIURL + "/api/ShoppingBag/GenerateManifest", apiGenMenifestReq);
+                                            manifestResponce = JsonConvert.DeserializeObject<ManifestResponce>(apiGenMenifestRes);
+                                            if (manifestResponce.status == "1")
+                                            {
+                                                UpdateGeneratePickupManifest(orderDetails.Id, orderDetails.TenantId, orderDetails.Id, "Manifest", ConString);
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+                                        }
+                                    }
+                                }
                             }
                         }
                         else
