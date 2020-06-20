@@ -69,15 +69,17 @@ namespace AWBNumberUpdate
                     }
                 }
             }
-            catch
+            catch(Exception ex)
             {
 
-
+                throw ex; 
             }
             finally
             {
-
+               
                 GC.Collect();
+
+                
             }
 
 
@@ -100,7 +102,7 @@ namespace AWBNumberUpdate
                 DataSet ds = new DataSet();
                 AWBRequest objdetails = new AWBRequest();
                 IConfiguration config = new ConfigurationBuilder().AddJsonFile("appsettings.json", true, true).Build();
-                var constr = config.GetSection("ConnectionStrings").GetSection("HomeShop").Value;
+                //var constr = config.GetSection("ConnectionStrings").GetSection("HomeShop").Value;
                 string ClientAPIURL = config.GetSection("MySettings").GetSection("ClientAPIURL").Value;
                 con = new MySqlConnection(ConString);
                 MySqlCommand cmd = new MySqlCommand("SP_PHYGetOrderdetailForAWB", con)
@@ -263,7 +265,7 @@ namespace AWBNumberUpdate
                 }
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
 
             }
