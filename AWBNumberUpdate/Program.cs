@@ -27,7 +27,7 @@ namespace AWBNumberUpdate
         {
             while (true)
             {
-               GetConnectionStrings();
+                GetConnectionStrings();
                 //GetdataFromMySQL();
                 Thread.Sleep(delaytime);
             }
@@ -69,17 +69,17 @@ namespace AWBNumberUpdate
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
 
-                throw ex; 
+                throw ex;
             }
             finally
             {
-               
+
                 GC.Collect();
 
-                
+
             }
 
 
@@ -117,149 +117,155 @@ namespace AWBNumberUpdate
 
                     for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
                     {
-                        if (ds != null && ds.Tables[1] != null)
+                        try
                         {
-                            objdetails = new AWBRequest()
+                            if (ds != null && ds.Tables[1] != null)
                             {
-                                pickup_postcode = ds.Tables[1].Rows[0]["pickup_postcode"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[1].Rows[0]["pickup_postcode"]),
-                                delivery_postcode = ds.Tables[1].Rows[0]["delivery_postcode"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[1].Rows[0]["delivery_postcode"]),
-                                weight = 1,
-                                orderDetails = new orderDetails()
-                            };
-
-                        }
-
-                        orderDetails orderDetails = new orderDetails
-                        {
-                            Id = ds.Tables[0].Rows[i]["ID"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[0].Rows[i]["ID"]),
-                            order_id = ds.Tables[0].Rows[i]["InvoiceNo"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["InvoiceNo"]),
-                            order_date = ds.Tables[0].Rows[i]["Date"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["Date"]),
-                            billing_customer_name = ds.Tables[0].Rows[i]["CustomerName"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["CustomerName"]),
-                            billing_address = ds.Tables[0].Rows[i]["ShippingAddress"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["ShippingAddress"]),
-                            billing_city = ds.Tables[0].Rows[i]["City"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["City"]),
-                            billing_pincode = ds.Tables[0].Rows[i]["delivery_postcode"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["delivery_postcode"]),
-                            billing_state = ds.Tables[0].Rows[i]["State"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["State"]),
-                            billing_country = ds.Tables[0].Rows[i]["Country"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["Country"]),
-                            //billing_email = ds.Tables[0].Rows[i]["EmailID"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["EmailID"]),
-                            billing_phone = ds.Tables[0].Rows[i]["MobileNumber"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["MobileNumber"]),
-                            shipping_customer_name = ds.Tables[0].Rows[i]["CustomerName"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["CustomerName"]),
-                            shipping_address = ds.Tables[0].Rows[i]["ShippingAddress"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["ShippingAddress"]),
-                            shipping_city = ds.Tables[0].Rows[i]["City"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["City"]),
-                            shipping_pincode = ds.Tables[0].Rows[i]["delivery_postcode"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["delivery_postcode"]),
-                            shipping_country = ds.Tables[0].Rows[i]["Country"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["Country"]),
-                            shipping_state = ds.Tables[0].Rows[i]["State"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["State"]),
-                            //shipping_email = ds.Tables[0].Rows[i]["EmailID"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["EmailID"]),
-                            shipping_phone = ds.Tables[0].Rows[i]["MobileNumber"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["MobileNumber"]),
-                            shipping_is_billing = true,
-                            billing_email = "naruto@uzumaki.com",
-                            shipping_email = "naruto@uzumaki.com",
-                            payment_method = "Prepaid",
-                            pickup_location = "Test",
-                            channel_id = "633828",
-                            billing_last_name = "",
-                            billing_address_2 = "",
-                            billing_alternate_phone = "",
-                            shipping_last_name = "",
-                            shipping_address_2 = "",
-                            sub_total = 20,
-                            length = 10,
-                            breadth = 10,
-                            height = 2,
-                            weight = 2,
-                            StoreDelivery = Convert.ToBoolean(ds.Tables[0].Rows[i]["StoreDelivery"]),
-                            TenantId = ds.Tables[0].Rows[i]["TenantId"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[0].Rows[i]["TenantId"]),
-                            order_items = new List<order_items>()
-                        };
-                        List<order_items> listobj = new List<order_items>();
-
-                        string ItemIDs = "";
-                        for (int j = 0; j < ds.Tables[2].Rows.Count; j++)
-                        {
-                            if (Convert.ToInt32(ds.Tables[2].Rows[j]["OrderID"]) == Convert.ToInt32(orderDetails.Id))
-                            {
-                                order_items objorder_Items = new order_items()
+                                objdetails = new AWBRequest()
                                 {
-                                    OrderItemID = ds.Tables[2].Rows[j]["ID"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[2].Rows[j]["ID"]),
-                                    name = ds.Tables[2].Rows[j]["ItemName"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[2].Rows[j]["ItemName"]),
-                                    sku = ds.Tables[2].Rows[j]["ItemID"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[2].Rows[j]["ItemID"]),
-                                    units = ds.Tables[2].Rows[j]["Quantity"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[2].Rows[j]["Quantity"]),
-                                    selling_price = ds.Tables[2].Rows[j]["ItemPrice"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[2].Rows[j]["ItemPrice"])
+                                    pickup_postcode = ds.Tables[1].Rows[i]["pickup_postcode"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[1].Rows[i]["pickup_postcode"]),
+                                    delivery_postcode = ds.Tables[1].Rows[i]["delivery_postcode"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[1].Rows[i]["delivery_postcode"]),
+                                    weight = 1,
+                                    orderDetails = new orderDetails()
                                 };
-                                listobj.Add(objorder_Items);
-                                ItemIDs += ds.Tables[2].Rows[j]["ID"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[2].Rows[j]["ID"]) + ",";
 
                             }
 
-                        }
-                        orderDetails.order_items = listobj;
-                        ItemIDs = ItemIDs.TrimEnd(',');
-                        objdetails.orderDetails = orderDetails;
-                        string apiReq = JsonConvert.SerializeObject(objdetails);
-                        apiResponse = CommonService.SendApiRequest(ClientAPIURL + "/api/ShoppingBag/GetCouriersPartnerAndAWBCode", apiReq);
-                        awbResponce = JsonConvert.DeserializeObject<AWBResponce>(apiResponse);
-
-                        if (awbResponce.data.awb_code != "" && awbResponce.data.courier_name != "")
-                        {
-                          InsertCourierResponse(orderDetails.Id, ItemIDs, awbResponce.data.awb_code, awbResponce.data.courier_company_id, awbResponce.data.courier_name, awbResponce.data.order_id, awbResponce.data.shipment_id, ConString);
-
-                            if (awbResponce != null)
+                            orderDetails orderDetails = new orderDetails
                             {
-                                if (awbResponce.data != null)
+                                Id = ds.Tables[0].Rows[i]["ID"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[0].Rows[i]["ID"]),
+                                order_id = ds.Tables[0].Rows[i]["InvoiceNo"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["InvoiceNo"]),
+                                order_date = ds.Tables[0].Rows[i]["Date"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["Date"]),
+                                billing_customer_name = ds.Tables[0].Rows[i]["CustomerName"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["CustomerName"]),
+                                billing_address = ds.Tables[0].Rows[i]["ShippingAddress"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["ShippingAddress"]),
+                                billing_city = ds.Tables[0].Rows[i]["City"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["City"]),
+                                billing_pincode = ds.Tables[0].Rows[i]["delivery_postcode"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["delivery_postcode"]),
+                                billing_state = ds.Tables[0].Rows[i]["State"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["State"]),
+                                billing_country = ds.Tables[0].Rows[i]["Country"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["Country"]),
+                                //billing_email = ds.Tables[0].Rows[i]["EmailID"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["EmailID"]),
+                                billing_phone = ds.Tables[0].Rows[i]["MobileNumber"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["MobileNumber"]),
+                                shipping_customer_name = ds.Tables[0].Rows[i]["CustomerName"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["CustomerName"]),
+                                shipping_address = ds.Tables[0].Rows[i]["ShippingAddress"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["ShippingAddress"]),
+                                shipping_city = ds.Tables[0].Rows[i]["City"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["City"]),
+                                shipping_pincode = ds.Tables[0].Rows[i]["delivery_postcode"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["delivery_postcode"]),
+                                shipping_country = ds.Tables[0].Rows[i]["Country"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["Country"]),
+                                shipping_state = ds.Tables[0].Rows[i]["State"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["State"]),
+                                //shipping_email = ds.Tables[0].Rows[i]["EmailID"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["EmailID"]),
+                                shipping_phone = ds.Tables[0].Rows[i]["MobileNumber"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["MobileNumber"]),
+                                shipping_is_billing = true,
+                                billing_email = "naruto@uzumaki.com",
+                                shipping_email = "naruto@uzumaki.com",
+                                payment_method = "Prepaid",
+                                pickup_location = "Test",
+                                channel_id = "633828",
+                                billing_last_name = "",
+                                billing_address_2 = "",
+                                billing_alternate_phone = "",
+                                shipping_last_name = "",
+                                shipping_address_2 = "",
+                                sub_total = 20,
+                                length = 10,
+                                breadth = 10,
+                                height = 2,
+                                weight = 2,
+                                StoreDelivery = Convert.ToBoolean(ds.Tables[0].Rows[i]["StoreDelivery"]),
+                                TenantId = ds.Tables[0].Rows[i]["TenantId"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[0].Rows[i]["TenantId"]),
+                                order_items = new List<order_items>()
+                            };
+                            List<order_items> listobj = new List<order_items>();
+
+                            string ItemIDs = "";
+                            for (int j = 0; j < ds.Tables[2].Rows.Count; j++)
+                            {
+                                if (Convert.ToInt32(ds.Tables[2].Rows[j]["OrderID"]) == Convert.ToInt32(orderDetails.Id))
                                 {
-                                    if (awbResponce.data.shipment_id != null)
+                                    order_items objorder_Items = new order_items()
                                     {
-                                        PickupManifestRequest pickupManifestRequest = new PickupManifestRequest()
-                                        {
-                                            shipmentId = new List<int> {
-                                                Convert.ToInt32(awbResponce.data.shipment_id)  
-                                            }
-                                        };
+                                        OrderItemID = ds.Tables[2].Rows[j]["ID"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[2].Rows[j]["ID"]),
+                                        name = ds.Tables[2].Rows[j]["ItemName"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[2].Rows[j]["ItemName"]),
+                                        sku = ds.Tables[2].Rows[j]["ItemID"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[2].Rows[j]["ItemID"]),
+                                        units = ds.Tables[2].Rows[j]["Quantity"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[2].Rows[j]["Quantity"]),
+                                        selling_price = ds.Tables[2].Rows[j]["ItemPrice"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[2].Rows[j]["ItemPrice"])
+                                    };
+                                    listobj.Add(objorder_Items);
+                                    ItemIDs += ds.Tables[2].Rows[j]["ID"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[2].Rows[j]["ID"]) + ",";
 
-                                        try
+                                }
+
+                            }
+                            orderDetails.order_items = listobj;
+                            ItemIDs = ItemIDs.TrimEnd(',');
+                            objdetails.orderDetails = orderDetails;
+                            string apiReq = JsonConvert.SerializeObject(objdetails);
+                            apiResponse = CommonService.SendApiRequest(ClientAPIURL + "/api/ShoppingBag/GetCouriersPartnerAndAWBCode", apiReq);
+                            awbResponce = JsonConvert.DeserializeObject<AWBResponce>(apiResponse);
+
+                            if (awbResponce.data.awb_code != "" && awbResponce.data.courier_name != "")
+                            {
+                                InsertCourierResponse(orderDetails.Id, ItemIDs, awbResponce.data.awb_code, awbResponce.data.courier_company_id, awbResponce.data.courier_name, awbResponce.data.order_id, awbResponce.data.shipment_id, ConString);
+
+                                if (awbResponce != null)
+                                {
+                                    if (awbResponce.data != null)
+                                    {
+                                        if (awbResponce.data.shipment_id != null)
                                         {
-                                            string apiGenPickupReq = JsonConvert.SerializeObject(pickupManifestRequest);
-                                            apiGenPickupRes = CommonService.SendApiRequest(ClientAPIURL + "/api​/ShoppingBag​/GeneratePickup", apiGenPickupReq);
-                                            pickupResponce = JsonConvert.DeserializeObject<PickupResponce>(apiGenPickupRes);
-                                            if (pickupResponce.response.pickupTokenNumber != "")
+                                            PickupManifestRequest pickupManifestRequest = new PickupManifestRequest()
                                             {
-                                                UpdateGeneratePickupManifest(orderDetails.Id, orderDetails.TenantId, orderDetails.Id, "Pickup", ConString);
+                                                shipmentId = new List<int> {
+                                                Convert.ToInt32(awbResponce.data.shipment_id)
                                             }
-                                        }
-                                        catch (Exception ex)
-                                        {
+                                            };
 
-                                        }
-                                        try
-                                        {
-                                            string apiGenMenifestReq = JsonConvert.SerializeObject(pickupManifestRequest);
-                                            apiGenMenifestRes = CommonService.SendApiRequest(ClientAPIURL + "/api/ShoppingBag/GenerateManifest", apiGenMenifestReq);
-                                            manifestResponce = JsonConvert.DeserializeObject<ManifestResponce>(apiGenMenifestRes);
-                                            if (manifestResponce.status == "1")
+                                            try
                                             {
-                                                UpdateGeneratePickupManifest(orderDetails.Id, orderDetails.TenantId, orderDetails.Id, "Manifest", ConString);
+                                                string apiGenPickupReq = JsonConvert.SerializeObject(pickupManifestRequest);
+                                                apiGenPickupRes = CommonService.SendApiRequest(ClientAPIURL + "/api​/ShoppingBag​/GeneratePickup", apiGenPickupReq);
+                                                pickupResponce = JsonConvert.DeserializeObject<PickupResponce>(apiGenPickupRes);
+                                                if (pickupResponce.response.pickupTokenNumber != "")
+                                                {
+                                                    UpdateGeneratePickupManifest(orderDetails.Id, orderDetails.TenantId, orderDetails.Id, "Pickup", ConString);
+                                                }
                                             }
-                                        }
-                                        catch (Exception ex)
-                                        {
+                                            catch (Exception ex)
+                                            {
 
+                                            }
+                                            try
+                                            {
+                                                string apiGenMenifestReq = JsonConvert.SerializeObject(pickupManifestRequest);
+                                                apiGenMenifestRes = CommonService.SendApiRequest(ClientAPIURL + "/api/ShoppingBag/GenerateManifest", apiGenMenifestReq);
+                                                manifestResponce = JsonConvert.DeserializeObject<ManifestResponce>(apiGenMenifestRes);
+                                                if (manifestResponce.status == "1")
+                                                {
+                                                    UpdateGeneratePickupManifest(orderDetails.Id, orderDetails.TenantId, orderDetails.Id, "Manifest", ConString);
+                                                }
+                                            }
+                                            catch (Exception ex)
+                                            {
+
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
-                        else
-                        {
-                            if (orderDetails.StoreDelivery == true)
-                            {
-                                 AddStoreResponse(orderDetails.Id, ItemIDs, orderDetails.TenantId, true, ConString);
-                            }
                             else
                             {
-                              AddStoreResponse(orderDetails.Id, ItemIDs, orderDetails.TenantId, false, ConString);
+                                if (orderDetails.StoreDelivery == true)
+                                {
+                                    AddStoreResponse(orderDetails.Id, ItemIDs, orderDetails.TenantId, true, ConString);
+                                }
+                                else
+                                {
+                                    AddStoreResponse(orderDetails.Id, ItemIDs, orderDetails.TenantId, false, ConString);
+                                }
+
                             }
+                        }
+                        catch (Exception Ex)
+                        {
 
                         }
-
                     }
 
                 }
@@ -280,7 +286,7 @@ namespace AWBNumberUpdate
         }
 
 
-        public static void AddStoreResponse(int ID, string ItemIDs, int TenantId, bool storeFlag,string ConString)
+        public static void AddStoreResponse(int ID, string ItemIDs, int TenantId, bool storeFlag, string ConString)
         {
 
             try
@@ -317,7 +323,7 @@ namespace AWBNumberUpdate
 
         }
 
-        public static void InsertCourierResponse(int OrderId, string ItemIDs, string awbCode, string courierCompnyId, string courierCompnyName, string courierOrderId, string courierShipmentId,string ConString)
+        public static void InsertCourierResponse(int OrderId, string ItemIDs, string awbCode, string courierCompnyId, string courierCompnyName, string courierOrderId, string courierShipmentId, string ConString)
         {
 
             try
@@ -326,7 +332,7 @@ namespace AWBNumberUpdate
                 IConfiguration config = new ConfigurationBuilder().AddJsonFile("appsettings.json", true, true).Build();
                 var constr = config.GetSection("ConnectionStrings").GetSection("HomeShop").Value;
                 MySqlConnection con = new MySqlConnection(ConString);
-               
+
                 MySqlCommand cmd = new MySqlCommand("SP_PHYInsertAWBDetails", con)
                 {
                     CommandType = CommandType.StoredProcedure
@@ -354,9 +360,9 @@ namespace AWBNumberUpdate
         }
 
 
-        public static void UpdateGeneratePickupManifest(int orderID, int tenantID, int userID, string status,string ConString)
+        public static void UpdateGeneratePickupManifest(int orderID, int tenantID, int userID, string status, string ConString)
         {
-           
+
             try
             {
                 DataTable dt = new DataTable();
