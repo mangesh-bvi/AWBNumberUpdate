@@ -36,6 +36,8 @@ namespace AWBNumberUpdate.Model
         [JsonIgnore]
         public int TenantId { get; set; }
         [JsonIgnore]
+        public int StoreId { get; set; }
+        [JsonIgnore]
         public bool StoreDelivery { get; set; }
 
         public string order_id { get; set; }

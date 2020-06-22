@@ -101,6 +101,7 @@ namespace AWBNumberUpdate
             {
                 DataSet ds = new DataSet();
                 AWBRequest objdetails = new AWBRequest();
+                orderDetails orderDetails = new orderDetails();
                 IConfiguration config = new ConfigurationBuilder().AddJsonFile("appsettings.json", true, true).Build();
                 //var constr = config.GetSection("ConnectionStrings").GetSection("HomeShop").Value;
                 string ClientAPIURL = config.GetSection("MySettings").GetSection("ClientAPIURL").Value;
@@ -131,7 +132,7 @@ namespace AWBNumberUpdate
 
                             }
 
-                            orderDetails orderDetails = new orderDetails
+                            orderDetails = new orderDetails
                             {
                                 Id = ds.Tables[0].Rows[i]["ID"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[0].Rows[i]["ID"]),
                                 order_id = ds.Tables[0].Rows[i]["InvoiceNo"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["InvoiceNo"]),
@@ -170,6 +171,7 @@ namespace AWBNumberUpdate
                                 weight = 2,
                                 StoreDelivery = Convert.ToBoolean(ds.Tables[0].Rows[i]["StoreDelivery"]),
                                 TenantId = ds.Tables[0].Rows[i]["TenantId"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[0].Rows[i]["TenantId"]),
+                                StoreId = ds.Tables[0].Rows[i]["StoreId"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[0].Rows[i]["StoreId"]),
                                 order_items = new List<order_items>()
                             };
                             List<order_items> listobj = new List<order_items>();
@@ -193,63 +195,20 @@ namespace AWBNumberUpdate
                                 }
 
                             }
-                            orderDetails.order_items = listobj;
                             ItemIDs = ItemIDs.TrimEnd(',');
-                            objdetails.orderDetails = orderDetails;
-                            string apiReq = JsonConvert.SerializeObject(objdetails);
-                            apiResponse = CommonService.SendApiRequest(ClientAPIURL + "/api/ShoppingBag/GetCouriersPartnerAndAWBCode", apiReq);
-                            awbResponce = JsonConvert.DeserializeObject<AWBResponce>(apiResponse);
+                            /*Check the Pincode Deliver or not*/
 
-                            if (awbResponce.data.awb_code != "" && awbResponce.data.courier_name != "")
+                            HSChkCourierAvailibilty hSChkCourierAvailibilty = new HSChkCourierAvailibilty
                             {
-                                InsertCourierResponse(orderDetails.Id, ItemIDs, awbResponce.data.awb_code, awbResponce.data.courier_company_id, awbResponce.data.courier_name, awbResponce.data.order_id, awbResponce.data.shipment_id, ConString);
+                                Pickup_postcode = objdetails.pickup_postcode,
+                                Delivery_postcode = objdetails.delivery_postcode
+                            };
 
-                                if (awbResponce != null)
-                                {
-                                    if (awbResponce.data != null)
-                                    {
-                                        if (awbResponce.data.shipment_id != null)
-                                        {
-                                            PickupManifestRequest pickupManifestRequest = new PickupManifestRequest()
-                                            {
-                                                shipmentId = new List<int> {
-                                                Convert.ToInt32(awbResponce.data.shipment_id)
-                                            }
-                                            };
+                            ResponseCourierAvailibilty responseCourierAvailibilty = new ResponseCourierAvailibilty();
+                            responseCourierAvailibilty = CheckClientPinCodeForCourierAvailibilty(hSChkCourierAvailibilty, orderDetails.TenantId, orderDetails.Id, ClientAPIURL);
 
-                                            try
-                                            {
-                                                string apiGenPickupReq = JsonConvert.SerializeObject(pickupManifestRequest);
-                                                apiGenPickupRes = CommonService.SendApiRequest(ClientAPIURL + "/api​/ShoppingBag​/GeneratePickup", apiGenPickupReq);
-                                                pickupResponce = JsonConvert.DeserializeObject<PickupResponce>(apiGenPickupRes);
-                                                if (pickupResponce.response.pickupTokenNumber != "")
-                                                {
-                                                    UpdateGeneratePickupManifest(orderDetails.Id, orderDetails.TenantId, orderDetails.Id, "Pickup", ConString);
-                                                }
-                                            }
-                                            catch (Exception ex)
-                                            {
-
-                                            }
-                                            try
-                                            {
-                                                string apiGenMenifestReq = JsonConvert.SerializeObject(pickupManifestRequest);
-                                                apiGenMenifestRes = CommonService.SendApiRequest(ClientAPIURL + "/api/ShoppingBag/GenerateManifest", apiGenMenifestReq);
-                                                manifestResponce = JsonConvert.DeserializeObject<ManifestResponce>(apiGenMenifestRes);
-                                                if (manifestResponce.status == "1")
-                                                {
-                                                    UpdateGeneratePickupManifest(orderDetails.Id, orderDetails.TenantId, orderDetails.Id, "Manifest", ConString);
-                                                }
-                                            }
-                                            catch (Exception ex)
-                                            {
-
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            else
+                            /*Check the Pincode Deliver or not*/
+                            if (responseCourierAvailibilty.Available == "false")
                             {
                                 if (orderDetails.StoreDelivery == true)
                                 {
@@ -259,17 +218,111 @@ namespace AWBNumberUpdate
                                 {
                                     AddStoreResponse(orderDetails.Id, ItemIDs, orderDetails.TenantId, false, ConString);
                                 }
+                            }
+                            else if (responseCourierAvailibilty.Available == "true")
+                            {
+                                orderDetails.order_items = listobj;
+                                ItemIDs = ItemIDs.TrimEnd(',');
+                                objdetails.orderDetails = orderDetails;
+                                string apiReq = JsonConvert.SerializeObject(objdetails);
+                                apiResponse = CommonService.SendApiRequest(ClientAPIURL + "/api/ShoppingBag/GetCouriersPartnerAndAWBCode", apiReq);
+                                awbResponce = JsonConvert.DeserializeObject<AWBResponce>(apiResponse);
+                                if (awbResponce.data != null)
+                                {
 
+
+                                    if (awbResponce.data.awb_code != "" && awbResponce.data.courier_name != "" && awbResponce.statusCode == "200")
+                                    {
+                                        InsertCourierResponse(orderDetails.Id, ItemIDs, awbResponce.data.awb_code, awbResponce.data.courier_company_id, awbResponce.data.courier_name, awbResponce.data.order_id, awbResponce.data.shipment_id, ConString);
+
+                                        if (awbResponce != null)
+                                        {
+                                            if (awbResponce.data != null)
+                                            {
+                                                if (awbResponce.data.shipment_id != null)
+                                                {
+                                                    PickupManifestRequest pickupManifestRequest = new PickupManifestRequest()
+                                                    {
+                                                        shipmentId = new List<int> {
+                                                        Convert.ToInt32(awbResponce.data.shipment_id)
+                                                    }
+                                                    };
+
+                                                    try
+                                                    {
+                                                        string apiGenPickupReq = JsonConvert.SerializeObject(pickupManifestRequest);
+                                                        apiGenPickupRes = CommonService.SendApiRequest(ClientAPIURL + "/api/ShoppingBag/GeneratePickup", apiGenPickupReq);
+                                                        pickupResponce = JsonConvert.DeserializeObject<PickupResponce>(apiGenPickupRes);
+                                                        //if (pickupResponce.response.pickupTokenNumber != "")
+                                                        //{
+                                                        //    UpdateGeneratePickupManifest(orderDetails.Id, orderDetails.TenantId, orderDetails.Id, "Pickup", ConString);
+                                                        //}
+                                                        if (pickupResponce.status_code == 0 && pickupResponce.pickupStatus == "1")
+                                                        {
+                                                            if (pickupResponce.response != null)
+                                                            {
+                                                                if (pickupResponce.response.pickupTokenNumber != null)
+                                                                {
+                                                                    //UpdateGeneratePickupManifest(ID, "Pickup", ConString, TenantId);
+                                                                    UpdateGeneratePickupManifest(orderDetails.Id, orderDetails.TenantId, orderDetails.Id, "Pickup", ConString);
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            ExLogger(orderDetails.Id, orderDetails.order_id, Convert.ToString(DateTime.Now), Convert.ToString(orderDetails.StoreId), pickupResponce.status_code + " : " + pickupResponce.message, apiGenPickupRes, ConString);
+                                                        }
+                                                    }
+                                                    catch (Exception ex)
+                                                    {
+                                                        ExLogger(orderDetails.Id, orderDetails.order_id, orderDetails.order_date, Convert.ToString(orderDetails.StoreId), ex.Message, ex.StackTrace, ConString);
+                                                    }
+                                                    try
+                                                    {
+                                                        string apiGenMenifestReq = JsonConvert.SerializeObject(pickupManifestRequest);
+                                                        apiGenMenifestRes = CommonService.SendApiRequest(ClientAPIURL + "/api/ShoppingBag/GenerateManifest", apiGenMenifestReq);
+                                                        manifestResponce = JsonConvert.DeserializeObject<ManifestResponce>(apiGenMenifestRes);
+                                                        if (manifestResponce.status_code == 0)
+                                                        {
+                                                            if (manifestResponce.status == "1" && manifestResponce.manifestUrl != null && manifestResponce.manifestUrl != "")
+                                                            {
+                                                                UpdateGeneratePickupManifest(orderDetails.Id, orderDetails.TenantId, orderDetails.Id, "Manifest", ConString);
+                                                            }
+                                                            else
+                                                            {
+                                                                ExLogger(orderDetails.Id, orderDetails.order_id, Convert.ToString(DateTime.Now), Convert.ToString(orderDetails.StoreId), manifestResponce.status, apiGenMenifestRes, ConString);
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            ExLogger(orderDetails.Id, orderDetails.order_id, Convert.ToString(DateTime.Now), Convert.ToString(orderDetails.StoreId), manifestResponce.status_code + " : " + manifestResponce.message, apiGenMenifestRes, ConString);
+                                                        }
+                                                    }
+                                                    catch (Exception ex)
+                                                    {
+                                                        ExLogger(orderDetails.Id, orderDetails.order_id, orderDetails.order_date, Convert.ToString(orderDetails.StoreId), ex.Message, ex.StackTrace, ConString);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        AddStoreResponse(orderDetails.Id, ItemIDs, orderDetails.TenantId, false, ConString);
+                                    }
+                                }
+                                else
+                                {
+                                    AddStoreResponse(orderDetails.Id, ItemIDs, orderDetails.TenantId, false, ConString);
+                                }
                             }
                         }
                         catch (Exception Ex)
                         {
-
+                            ExLogger(orderDetails.Id, orderDetails.order_id, orderDetails.order_date,Convert.ToString(orderDetails.StoreId), Ex.Message, Ex.StackTrace, ConString);
                         }
                     }
-
                 }
-
             }
             catch (Exception ex)
             {
@@ -302,7 +355,7 @@ namespace AWBNumberUpdate
                 cmd.Parameters.AddWithValue("@_id", ID);
                 cmd.Parameters.AddWithValue("@item_IDs", ItemIDs);
                 cmd.Parameters.AddWithValue("@_TenantID", TenantId);
-                cmd.Parameters.AddWithValue("@_storeFlag", storeFlag);
+                cmd.Parameters.AddWithValue("@_deliveryflag", storeFlag);
                 cmd.Parameters.AddWithValue("@_awbCode", "");
                 //cmd.Parameters.AddWithValue("@_courierCompnyName", courierCompnyName);
 
@@ -312,7 +365,7 @@ namespace AWBNumberUpdate
                 cmd.ExecuteNonQuery();
                 cmd.Connection.Close();
             }
-            catch
+            catch(Exception ex)
             {
 
             }
@@ -390,6 +443,83 @@ namespace AWBNumberUpdate
                 GC.Collect();
             }
 
+        }
+
+        /// <summary>
+        /// CheckClientPinCodeForCourierAvailibilty
+        /// </summary>
+        /// <param name="hSChkCourierAvailibilty"></param>
+        /// <param name="tenantID"></param>
+        /// <param name="userID"></param>
+        /// <param name="clientAPIUrl"></param>
+        /// <returns></returns>
+        public static ResponseCourierAvailibilty CheckClientPinCodeForCourierAvailibilty(HSChkCourierAvailibilty hSChkCourierAvailibilty, int tenantID, int userID, string clientAPIUrl)
+        {
+            ResponseCourierAvailibilty responseCourierAvailibilty = new ResponseCourierAvailibilty();
+            string apiResponse = string.Empty;
+            try
+            {
+                hSChkCourierAvailibilty.Cod = 0;
+                hSChkCourierAvailibilty.Weight = 1;
+                string apiReq = JsonConvert.SerializeObject(hSChkCourierAvailibilty);
+                apiResponse = CommonService.SendApiRequest(clientAPIUrl + "/api/ShoppingBag/ChkCourierAvailibilty", apiReq);
+                responseCourierAvailibilty = JsonConvert.DeserializeObject<ResponseCourierAvailibilty>(apiResponse);
+            }
+            catch (Exception)
+            {
+                responseCourierAvailibilty = new ResponseCourierAvailibilty
+                {
+                    StatusCode = "201",
+                    Available = "false"
+                };
+            }
+            finally
+            {
+                
+            }
+            return responseCourierAvailibilty;
+        }
+
+        /// <summary>
+        /// ExLogger
+        /// </summary>
+        /// <param name="TransactionID"></param>
+        /// <param name="BillNo"></param>
+        /// <param name="BillDate"></param>
+        /// <param name="StoreCode"></param>
+        /// <param name="ErrorMessage"></param>
+        /// <param name="ErrorDiscription"></param>
+        /// <param name="ConString"></param>
+        public static void ExLogger(int TransactionID, string BillNo, string BillDate, string StoreCode, string ErrorMessage, string ErrorDiscription, string ConString)
+        {
+            try
+            {
+                DataTable dt = new DataTable();
+                IConfiguration config = new ConfigurationBuilder().AddJsonFile("appsettings.json", true, true).Build();
+                var constr = config.GetSection("ConnectionStrings").GetSection("HomeShop").Value;
+                MySqlConnection con = new MySqlConnection(ConString);
+                MySqlCommand cmd = new MySqlCommand("SP_PHYInsertErrorLog", con)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@_transactionID", TransactionID);
+                cmd.Parameters.AddWithValue("@_billNo", BillNo);
+                cmd.Parameters.AddWithValue("@_billDate", BillDate);
+                cmd.Parameters.AddWithValue("@_storeCode", StoreCode);
+                cmd.Parameters.AddWithValue("@_errorMessage", ErrorMessage);
+                cmd.Parameters.AddWithValue("@_errorDiscription", ErrorDiscription);
+                cmd.Parameters.AddWithValue("@_repeatCount", 0);
+                cmd.Parameters.AddWithValue("@_functionName", "AWM Number Update");
+                cmd.Connection.Open();
+                cmd.ExecuteNonQuery();
+                cmd.Connection.Close();
+            }
+            catch (Exception ex)
+            {
+                //write code for genral exception
+            }
+            finally { GC.Collect(); }
         }
     }
 }

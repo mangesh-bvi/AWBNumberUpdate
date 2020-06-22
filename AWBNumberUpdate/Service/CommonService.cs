@@ -32,6 +32,20 @@ namespace AWBNumberUpdate.Service
                     strresponse = streamReader.ReadToEnd();
                 }
             }
+            catch (WebException e)
+            {
+                using (WebResponse response = e.Response)
+                {
+                    HttpWebResponse httpResponse = (HttpWebResponse)response;
+
+                    using (Stream data = response.GetResponseStream())
+                    using (var reader = new StreamReader(data))
+                    {
+                        strresponse = reader.ReadToEnd();
+
+                    }
+                }
+            }
             catch (Exception )
             {
                

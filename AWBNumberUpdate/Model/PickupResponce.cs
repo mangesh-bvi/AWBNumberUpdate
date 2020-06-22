@@ -9,6 +9,8 @@ namespace AWBNumberUpdate.Model
         public string pickupStatus  { get; set; }
        
         public response response { get; set; }
+        public string message { get; set; }
+        public int status_code { get; set; }
     }
     public class response
     {
