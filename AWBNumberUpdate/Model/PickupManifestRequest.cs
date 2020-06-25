@@ -6,6 +6,9 @@ namespace AWBNumberUpdate.Model
 {
     public class PickupManifestRequest
     {
+        /// <summary>
+        /// shipmentId
+        /// </summary>
         public List<int> shipmentId { get; set; }
 
     }

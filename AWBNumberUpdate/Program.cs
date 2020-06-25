@@ -28,11 +28,14 @@ namespace AWBNumberUpdate
             while (true)
             {
                 GetConnectionStrings();
-                //GetdataFromMySQL();
+               
                 Thread.Sleep(delaytime);
             }
         }
 
+        /// <summary>
+        /// GetConnectionStrings
+        /// </summary>
         public static void GetConnectionStrings()
         {
             string ServerName = string.Empty;
@@ -85,7 +88,10 @@ namespace AWBNumberUpdate
 
         }
 
-
+        /// <summary>
+        /// GetdataFromMySQL
+        /// </summary>
+        /// <param name="ConString"></param>
         public static void GetdataFromMySQL(string ConString)
         {
             string apiResponse = string.Empty;
@@ -103,7 +109,7 @@ namespace AWBNumberUpdate
                 AWBRequest objdetails = new AWBRequest();
                 orderDetails orderDetails = new orderDetails();
                 IConfiguration config = new ConfigurationBuilder().AddJsonFile("appsettings.json", true, true).Build();
-                //var constr = config.GetSection("ConnectionStrings").GetSection("HomeShop").Value;
+               
                 string ClientAPIURL = config.GetSection("MySettings").GetSection("ClientAPIURL").Value;
                 con = new MySqlConnection(ConString);
                 MySqlCommand cmd = new MySqlCommand("SP_PHYGetOrderdetailForAWB", con)
@@ -113,6 +119,7 @@ namespace AWBNumberUpdate
                 cmd.Connection.Open();
                 MySqlDataAdapter da = new MySqlDataAdapter(cmd);
                 da.Fill(ds);
+                cmd.Connection.Close();
                 if (ds != null && ds.Tables[0] != null)
                 {
 
@@ -338,7 +345,14 @@ namespace AWBNumberUpdate
             }
         }
 
-
+        /// <summary>
+        /// AddStoreResponse
+        /// </summary>
+        /// <param name="ID"></param>
+        /// <param name="ItemIDs"></param>
+        /// <param name="TenantId"></param>
+        /// <param name="storeFlag"></param>
+        /// <param name="ConString"></param>
         public static void AddStoreResponse(int ID, string ItemIDs, int TenantId, bool storeFlag, string ConString)
         {
 
@@ -376,6 +390,18 @@ namespace AWBNumberUpdate
 
         }
 
+
+        /// <summary>
+        /// Insert CourierResponse
+        /// </summary>
+        /// <param name="OrderId"></param>
+        /// <param name="ItemIDs"></param>
+        /// <param name="awbCode"></param>
+        /// <param name="courierCompnyId"></param>
+        /// <param name="courierCompnyName"></param>
+        /// <param name="courierOrderId"></param>
+        /// <param name="courierShipmentId"></param>
+        /// <param name="ConString"></param>
         public static void InsertCourierResponse(int OrderId, string ItemIDs, string awbCode, string courierCompnyId, string courierCompnyName, string courierOrderId, string courierShipmentId, string ConString)
         {
 
@@ -412,7 +438,14 @@ namespace AWBNumberUpdate
 
         }
 
-
+        /// <summary>
+        /// UpdateGeneratePickupManifest
+        /// </summary>
+        /// <param name="orderID"></param>
+        /// <param name="tenantID"></param>
+        /// <param name="userID"></param>
+        /// <param name="status"></param>
+        /// <param name="ConString"></param>
         public static void UpdateGeneratePickupManifest(int orderID, int tenantID, int userID, string status, string ConString)
         {
 
@@ -515,9 +548,8 @@ namespace AWBNumberUpdate
                 cmd.ExecuteNonQuery();
                 cmd.Connection.Close();
             }
-            catch (Exception ex)
+            catch
             {
-                //write code for genral exception
             }
             finally { GC.Collect(); }
         }
