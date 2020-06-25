@@ -43,13 +43,13 @@ namespace AWBNumberUpdate
             string ServerCredentailsPassword = string.Empty;
             string DBConnection = string.Empty;
 
-
+            MySqlConnection con = null;
             try
             {
                 DataTable dt = new DataTable();
                 IConfiguration config = new ConfigurationBuilder().AddJsonFile("appsettings.json", true, true).Build();
                 var constr = config.GetSection("ConnectionStrings").GetSection("HomeShop").Value;
-                MySqlConnection con = new MySqlConnection(constr);
+                con = new MySqlConnection(constr);
                 MySqlCommand cmd = new MySqlCommand("SP_HSGetAllConnectionstrings", con);
                 cmd.CommandType = System.Data.CommandType.StoredProcedure;
                 cmd.Connection.Open();
@@ -74,15 +74,15 @@ namespace AWBNumberUpdate
             }
             catch (Exception ex)
             {
-
-                throw ex;
+             throw ex;
             }
             finally
             {
-
+                if (con != null)
+                {
+                    con.Close();
+                }
                 GC.Collect();
-
-
             }
 
 
@@ -355,13 +355,13 @@ namespace AWBNumberUpdate
         /// <param name="ConString"></param>
         public static void AddStoreResponse(int ID, string ItemIDs, int TenantId, bool storeFlag, string ConString)
         {
-
+            MySqlConnection con = null;
             try
             {
                 DataTable dt = new DataTable();
                 IConfiguration config = new ConfigurationBuilder().AddJsonFile("appsettings.json", true, true).Build();
                 var constr = config.GetSection("ConnectionStrings").GetSection("HomeShop").Value;
-                MySqlConnection con = new MySqlConnection(ConString);
+                con = new MySqlConnection(ConString);
                 MySqlCommand cmd = new MySqlCommand("SP_PHYUpdateStoreResponce", con)
                 {
                     CommandType = CommandType.StoredProcedure
@@ -371,10 +371,6 @@ namespace AWBNumberUpdate
                 cmd.Parameters.AddWithValue("@_TenantID", TenantId);
                 cmd.Parameters.AddWithValue("@_deliveryflag", storeFlag);
                 cmd.Parameters.AddWithValue("@_awbCode", "");
-                //cmd.Parameters.AddWithValue("@_courierCompnyName", courierCompnyName);
-
-
-
                 cmd.Connection.Open();
                 cmd.ExecuteNonQuery();
                 cmd.Connection.Close();
@@ -385,6 +381,10 @@ namespace AWBNumberUpdate
             }
             finally
             {
+                if (con != null)
+                {
+                    con.Close();
+                }
                 GC.Collect();
             }
 
@@ -448,13 +448,13 @@ namespace AWBNumberUpdate
         /// <param name="ConString"></param>
         public static void UpdateGeneratePickupManifest(int orderID, int tenantID, int userID, string status, string ConString)
         {
-
+            MySqlConnection con = null;
             try
             {
                 DataTable dt = new DataTable();
                 IConfiguration config = new ConfigurationBuilder().AddJsonFile("appsettings.json", true, true).Build();
                 var constr = config.GetSection("ConnectionStrings").GetSection("HomeShop").Value;
-                MySqlConnection con = new MySqlConnection(ConString);
+                con = new MySqlConnection(ConString);
                 MySqlCommand cmd = new MySqlCommand("SP_PHYUpdateflagPickupManifest", con)
                 {
                     CommandType = CommandType.StoredProcedure
@@ -473,6 +473,10 @@ namespace AWBNumberUpdate
             }
             finally
             {
+                if (con != null)
+                {
+                    con.Close();
+                }
                 GC.Collect();
             }
 
@@ -490,6 +494,7 @@ namespace AWBNumberUpdate
         {
             ResponseCourierAvailibilty responseCourierAvailibilty = new ResponseCourierAvailibilty();
             string apiResponse = string.Empty;
+            MySqlConnection con = null;
             try
             {
                 hSChkCourierAvailibilty.Cod = 0;
@@ -508,7 +513,12 @@ namespace AWBNumberUpdate
             }
             finally
             {
-                
+                if (con != null)
+                {
+                    con.Close();
+                }
+                GC.Collect();
+
             }
             return responseCourierAvailibilty;
         }
@@ -525,12 +535,13 @@ namespace AWBNumberUpdate
         /// <param name="ConString"></param>
         public static void ExLogger(int TransactionID, string BillNo, string BillDate, string StoreCode, string ErrorMessage, string ErrorDiscription, string ConString)
         {
+            MySqlConnection con = null;
             try
             {
                 DataTable dt = new DataTable();
                 IConfiguration config = new ConfigurationBuilder().AddJsonFile("appsettings.json", true, true).Build();
                 var constr = config.GetSection("ConnectionStrings").GetSection("HomeShop").Value;
-                MySqlConnection con = new MySqlConnection(ConString);
+                con = new MySqlConnection(ConString);
                 MySqlCommand cmd = new MySqlCommand("SP_PHYInsertErrorLog", con)
                 {
                     CommandType = CommandType.StoredProcedure
@@ -551,7 +562,14 @@ namespace AWBNumberUpdate
             catch
             {
             }
-            finally { GC.Collect(); }
+            finally
+            {
+                if (con != null)
+                {
+                    con.Close();
+                }
+                GC.Collect();
+            }
         }
     }
 }
