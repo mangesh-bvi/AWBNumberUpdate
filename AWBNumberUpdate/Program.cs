@@ -242,6 +242,8 @@ namespace AWBNumberUpdate
                                     {
                                         InsertCourierResponse(orderDetails.Id, ItemIDs, awbResponce.data.awb_code, awbResponce.data.courier_company_id, awbResponce.data.courier_name, awbResponce.data.order_id, awbResponce.data.shipment_id, ConString);
 
+                                        CommonService.SmsWhatsUpDataSend(orderDetails.TenantId, 0, "", orderDetails.Id, ClientAPIURL, "AWBAssigned", ConString);
+
                                         if (awbResponce != null)
                                         {
                                             if (awbResponce.data != null)
@@ -272,6 +274,8 @@ namespace AWBNumberUpdate
                                                                 {
                                                                     //UpdateGeneratePickupManifest(ID, "Pickup", ConString, TenantId);
                                                                     UpdateGeneratePickupManifest(orderDetails.Id, orderDetails.TenantId, orderDetails.Id, "Pickup", ConString);
+
+                                                                    CommonService.SmsWhatsUpDataSend(orderDetails.TenantId, 0, "", orderDetails.Id, ClientAPIURL, "PickupScheduled", ConString);
                                                                 }
                                                             }
                                                         }
@@ -294,6 +298,8 @@ namespace AWBNumberUpdate
                                                             if (manifestResponce.status == "1" && manifestResponce.manifestUrl != null && manifestResponce.manifestUrl != "")
                                                             {
                                                                 UpdateGeneratePickupManifest(orderDetails.Id, orderDetails.TenantId, orderDetails.Id, "Manifest", ConString);
+
+                                                                CommonService.SmsWhatsUpDataSend(orderDetails.TenantId, 0, "", orderDetails.Id, ClientAPIURL, "ManifestGenerated", ConString);
                                                             }
                                                             else
                                                             {
