@@ -252,6 +252,11 @@ namespace AWBNumberUpdate.Model
         /// weight
         /// </summary>
         public decimal weight { get; set; }
+
+        /// <summary>
+        /// ProgramCode
+        /// </summary>
+        public string ProgramCode { get; set; }
     }
     public class order_items
     {

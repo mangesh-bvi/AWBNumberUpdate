@@ -175,10 +175,11 @@ namespace AWBNumberUpdate
                                 length = ds.Tables[0].Rows[i]["Length"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[0].Rows[i]["Length"]),
                                 breadth = ds.Tables[0].Rows[i]["Breath"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[0].Rows[i]["Breath"]),
                                 height = ds.Tables[0].Rows[i]["Height"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[0].Rows[i]["Height"]),
-                                weight = ds.Tables[0].Rows[i]["Breath"] == DBNull.Value ? 0 : Convert.ToDecimal(ds.Tables[0].Rows[i]["Weight"]),
+                                weight = ds.Tables[0].Rows[i]["Weight"] == DBNull.Value ? 0 : Convert.ToDecimal(ds.Tables[0].Rows[i]["Weight"]),
                                 StoreDelivery = Convert.ToBoolean(ds.Tables[0].Rows[i]["StoreDelivery"]),
                                 TenantId = ds.Tables[0].Rows[i]["TenantId"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[0].Rows[i]["TenantId"]),
                                 StoreId = ds.Tables[0].Rows[i]["StoreId"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[0].Rows[i]["StoreId"]),
+                                ProgramCode = ds.Tables[0].Rows[i]["ProgramCode"] == DBNull.Value ? string.Empty : Convert.ToString(ds.Tables[0].Rows[i]["ProgramCode"]),
                                 order_items = new List<order_items>()
                             };
                             List<order_items> listobj = new List<order_items>();
@@ -242,7 +243,7 @@ namespace AWBNumberUpdate
                                     {
                                         InsertCourierResponse(orderDetails.Id, ItemIDs, awbResponce.data.awb_code, awbResponce.data.courier_company_id, awbResponce.data.courier_name, awbResponce.data.order_id, awbResponce.data.shipment_id, ConString);
 
-                                        CommonService.SmsWhatsUpDataSend(orderDetails.TenantId, 0, "", orderDetails.Id, ClientAPIURL, "AWBAssigned", ConString);
+                                        CommonService.SmsWhatsUpDataSend(orderDetails.TenantId, 0, orderDetails.ProgramCode, orderDetails.Id, ClientAPIURL, "AWBAssigned", ConString);
 
                                         if (awbResponce != null)
                                         {
@@ -275,7 +276,7 @@ namespace AWBNumberUpdate
                                                                     //UpdateGeneratePickupManifest(ID, "Pickup", ConString, TenantId);
                                                                     UpdateGeneratePickupManifest(orderDetails.Id, orderDetails.TenantId, orderDetails.Id, "Pickup", ConString);
 
-                                                                    CommonService.SmsWhatsUpDataSend(orderDetails.TenantId, 0, "", orderDetails.Id, ClientAPIURL, "PickupScheduled", ConString);
+                                                                    CommonService.SmsWhatsUpDataSend(orderDetails.TenantId, 0, orderDetails.ProgramCode, orderDetails.Id, ClientAPIURL, "PickupScheduled", ConString);
                                                                 }
                                                             }
                                                         }
@@ -299,7 +300,7 @@ namespace AWBNumberUpdate
                                                             {
                                                                 UpdateGeneratePickupManifest(orderDetails.Id, orderDetails.TenantId, orderDetails.Id, "Manifest", ConString);
 
-                                                                CommonService.SmsWhatsUpDataSend(orderDetails.TenantId, 0, "", orderDetails.Id, ClientAPIURL, "ManifestGenerated", ConString);
+                                                                CommonService.SmsWhatsUpDataSend(orderDetails.TenantId, 0, orderDetails.ProgramCode, orderDetails.Id, ClientAPIURL, "ManifestGenerated", ConString);
                                                             }
                                                             else
                                                             {
