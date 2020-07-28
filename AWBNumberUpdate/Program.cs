@@ -133,7 +133,7 @@ namespace AWBNumberUpdate
                                 {
                                     pickup_postcode = ds.Tables[1].Rows[i]["pickup_postcode"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[1].Rows[i]["pickup_postcode"]),
                                     delivery_postcode = ds.Tables[1].Rows[i]["delivery_postcode"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[1].Rows[i]["delivery_postcode"]),
-                                    weight = 1,
+                                    weight = ds.Tables[1].Rows[i]["Weight"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[1].Rows[i]["Weight"]),
                                     orderDetails = new orderDetails()
                                 };
 
@@ -171,7 +171,7 @@ namespace AWBNumberUpdate
                                 billing_alternate_phone = "",
                                 shipping_last_name = "",
                                 shipping_address_2 = "",
-                                sub_total = 20,
+                                sub_total = ds.Tables[0].Rows[i]["Amount"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[0].Rows[i]["Amount"]),
                                 length = ds.Tables[0].Rows[i]["Length"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[0].Rows[i]["Length"]),
                                 breadth = ds.Tables[0].Rows[i]["Breath"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[0].Rows[i]["Breath"]),
                                 height = ds.Tables[0].Rows[i]["Height"] == DBNull.Value ? 0 : Convert.ToInt32(ds.Tables[0].Rows[i]["Height"]),
@@ -411,13 +411,13 @@ namespace AWBNumberUpdate
         /// <param name="ConString"></param>
         public static void InsertCourierResponse(int OrderId, string ItemIDs, string awbCode, string courierCompnyId, string courierCompnyName, string courierOrderId, string courierShipmentId, string ConString)
         {
-
+            MySqlConnection con = null;
             try
             {
                 DataTable dt = new DataTable();
                 IConfiguration config = new ConfigurationBuilder().AddJsonFile("appsettings.json", true, true).Build();
                 var constr = config.GetSection("ConnectionStrings").GetSection("HomeShop").Value;
-                MySqlConnection con = new MySqlConnection(ConString);
+                con = new MySqlConnection(ConString);
 
                 MySqlCommand cmd = new MySqlCommand("SP_PHYInsertAWBDetails", con)
                 {
@@ -440,6 +440,10 @@ namespace AWBNumberUpdate
             }
             finally
             {
+                if (con != null)
+                {
+                    con.Close();
+                }
                 GC.Collect();
             }
 
